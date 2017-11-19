@@ -4,8 +4,7 @@ Created on Sat Oct 28 16:16:39 2017
 
 @author: 任胜勇
 
-因为存在部分商场数据量过大，未完全拟合
-于是需要重复训练，在这里将early_stop_num数值变小便是为了尽量服务于未训练完成的模型
+
 """
 from tqdm import tqdm
 import pandas as pd
