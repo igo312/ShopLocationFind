@@ -2,13 +2,13 @@
 
 Created on Sat Oct 28 161639 2017
 
-@author ÈÎÊ¤ÓÂ
-ÕæµÄºÃĞÁ¿à
-ÏÖÔÚÒÑ¾­Áè³¿ÈıµãÁË
-Ï£ÍûÕâ¸öÑµÁ·¿ÉÒÔÓĞºÃµÄ½á¹û
-ËäÈ»È·ÊµÊÇÎÒ·¸ÁËºÜ¶à´í£¬
-µ«Õâ¾ÍÊÇĞÄÑªÁË
-ÎûÎû
+@author ä»»èƒœå‹‡
+çœŸçš„å¥½è¾›è‹¦
+ç°åœ¨å·²ç»å‡Œæ™¨ä¸‰ç‚¹äº†
+å¸Œæœ›è¿™ä¸ªè®­ç»ƒå¯ä»¥æœ‰å¥½çš„ç»“æœ
+è™½ç„¶ç¡®å®æ˜¯æˆ‘çŠ¯äº†å¾ˆå¤šé”™ï¼Œ
+ä½†è¿™å°±æ˜¯å¿ƒè¡€äº†
+å˜»å˜»
 
 from tqdm import tqdm
 import pandas as pd
@@ -16,14 +16,13 @@ from datetime import datetime
 from sklearn import preprocessing
 import numpy as np
 import os
-# the optimizer we will use
-import xgboost as xgb
+
 
 
 LOAD = False
 
 
-# Define the data path £¬and read it
+# Define the data path ï¼Œand read it
 path = 'Gcustomer&fixed-position'
 save_path = r'Gcustomer&fixed-positionxgb_model'
 dis_path = r'Gcustomer&fixed-positiondatashopshop_dis'
@@ -32,40 +31,36 @@ df = pd.read_csv(path + 'trainperson-ccf_first_round_user_shop_behavior.csv')
 shop = pd.read_csv(path + 'trainshop-ccf_first_round_shop_info.csv')
 test = pd.read_csv(path + 'Btest-evaluation_public.csv')
 
-# ½«ÉÌ³¡Ãû³ÆÓ³Éäµ½ÑµÁ·¼¯ÖĞ
+# å°†å•†åœºåç§°æ˜ å°„åˆ°è®­ç»ƒé›†ä¸­
 df = pd.merge(df, shop[['shop_id', 'mall_id']], how='left', on='shop_id')
 
-# ½«ÑµÁ·¼¯ºÍ²âÊÔ»úºÏ²¢
-'''Q1 ´æÔÚÊıÁ¿²»Æ½¾ù
-   A1Ê¹³ÉÎªNaNÖµ´æ´¢'''
+# å°†è®­ç»ƒé›†å’Œæµ‹è¯•æœºåˆå¹¶
+'''Q1 å­˜åœ¨æ•°é‡ä¸å¹³å‡
+   A1ä½¿æˆä¸ºNaNå€¼å­˜å‚¨'''
 train = df
 
-# »ñÈ¡mallµÄ×ÜÊı£¬·½±ãÓÚÖ®ºóÒÔmallÎªµ¥Î»µÄÑµÁ·
+# è·å–mallçš„æ€»æ•°ï¼Œæ–¹ä¾¿äºä¹‹åä»¥mallä¸ºå•ä½çš„è®­ç»ƒ
 mall_list = list(set(list(shop.mall_id)))
 
-# ¶¨Òå½á¹û¼¯
-result = pd.DataFrame()
 
-# ²ÎÊıµÄÉè¶¨
+
+# å‚æ•°çš„è®¾å®š
 drop_num = 115;
 threshold = 20;
 remain_num = 2
 
-# ÅÅ³ıÒÑÑµÁ·ºÃµÄÉÌ³¡
-mall_already=os.listdir(r'Gcustomer&fixed-positiondatatest_mall__')
-mall_already=[mall.split('.')[0] for mall in mall_already]
-mall_list=[mall for mall in mall_list if mall not in mall_already]
+
 for ID, mall in enumerate(mall_list)
-    print('¶ÁÈ¡ {} ÉÌ³¡Êı¾İ'.format(mall))
+    print('è¯»å– {} å•†åœºæ•°æ®'.format(mall))
     train1 = train[train.mall_id == mall].reset_index(drop=True)
-    print('ÏÖÔÚtrain1µÄshapeÎª{}'.format(train1.shape))
-    '''ÕâÀïÊÇ¹ØÓÚ¾­Î³¶ÈµÄ´¦Àí£¬ÀûÓÃ¾àÀë´¦ÀíµôÒ»Ğ©Òì³£Öµ
-        ×¢ÒâÄ³Ğ©ÉÌµê¶ÔÓ¦µÄÑµÁ·¼¯ÌØ±ğĞ¡£¬ÔõÃ´È¥À©´óÑµÁ·¼¯»¹ÊÇĞèÒª¿¼ÂÇµÄ'''
+    print('ç°åœ¨train1çš„shapeä¸º{}'.format(train1.shape))
+    '''è¿™é‡Œæ˜¯å…³äºç»çº¬åº¦çš„å¤„ç†ï¼Œåˆ©ç”¨è·ç¦»å¤„ç†æ‰ä¸€äº›å¼‚å¸¸å€¼
+        æ³¨æ„æŸäº›å•†åº—å¯¹åº”çš„è®­ç»ƒé›†ç‰¹åˆ«å°ï¼Œæ€ä¹ˆå»æ‰©å¤§è®­ç»ƒé›†è¿˜æ˜¯éœ€è¦è€ƒè™‘çš„'''
     buff_df = 0
-    # »ñÈ¡ÆäÖĞµÄshop
+    # è·å–å…¶ä¸­çš„shop
     shop_list = []
     shop_list.extend(list(shop[shop.mall_id == mall].shop_id.values))
-    # É¾³ıÈÏÎªµÄÒì³£Öµ
+    # åˆ é™¤è®¤ä¸ºçš„å¼‚å¸¸å€¼
     for shop_name in shop_list
         sp_lc=np.load(sp_lc_path+shop_name+'.npy');sp_lg=sp_lc[0];sp_lt=sp_lc[1]
         dis_data = pd.read_csv(dis_path + shop_name + '.csv').reset_index()
@@ -75,7 +70,7 @@ for ID, mall in enumerate(mall_list)
             buff_df = pd.merge(shop_train, dis_data[['dis','index']],
                                how='left', on=['index'])
             buff_df = buff_df.sort_values(['dis'], ascending=False)
-            # ½øĞĞ´¦Àí
+            # è¿›è¡Œå¤„ç†
             remain = buff_df[buff_df.dis  drop_num]
             delate = buff_df[buff_df.dis = drop_num]
             delate.longitude=sp_lg; delate.latitude=sp_lt
@@ -95,35 +90,35 @@ for ID, mall in enumerate(mall_list)
                 delate[indexindex+1].latitude += np.random.rand()150
             buff = pd.concat([remain,delate])
             buff_df = pd.concat([buff_df, buff])
-    print('ÏÖÔÚbuff_dfµÄshapeÎª{}'.format(buff_df.shape))
+    print('ç°åœ¨buff_dfçš„shapeä¸º{}'.format(buff_df.shape))
     train1 = pd.concat([buff_df, test[test.mall_id==mall]])
 
-    # ¶¨Òå´æ´¢±äÁ¿
+    # å®šä¹‰å­˜å‚¨å˜é‡
     l = [];
     wifi_remain = []
     wifi_dict = {}
     wifi_con_remain = []
-    # ÒÔÒ»ĞĞÒ»ĞĞµÄË³Ğò¶ÁÈ¡Êı¾İ¡£
+    # ä»¥ä¸€è¡Œä¸€è¡Œçš„é¡ºåºè¯»å–æ•°æ®ã€‚
     for index, row in tqdm(train1.iterrows())
-        # ·ÖÀëÊı¾İ
+        # åˆ†ç¦»æ•°æ®
         wifi_list = [wifi.split('') for wifi in row['wifi_infos'].split(';')]
 
-        # ÅĞ¶ÏÊÇ·ñÁ¬½Ó
+        # åˆ¤æ–­æ˜¯å¦è¿æ¥
         status = 0
 
         for i in wifi_list
 
-            # ÕâÀï½«ÔÚÓÃ»§Ô­ÏÈĞÅÏ¢µÄ»ù´¡ÉÏ¼ÓÉÏ
-            # ÔªËØÃûÎªwifiÃû³Æ£¬ÔªËØÖµÎªĞÅºÅÇ¿¶ÈµÄĞÅÏ¢
+            # è¿™é‡Œå°†åœ¨ç”¨æˆ·åŸå…ˆä¿¡æ¯çš„åŸºç¡€ä¸ŠåŠ ä¸Š
+            # å…ƒç´ åä¸ºwifiåç§°ï¼Œå…ƒç´ å€¼ä¸ºä¿¡å·å¼ºåº¦çš„ä¿¡æ¯
             row[i[0]] = int(i[1])
 
-            # ¼ÇÂ¼wifi³öÏÖµÄ´ÎÊı
+            # è®°å½•wifiå‡ºç°çš„æ¬¡æ•°
             if i[0] not in wifi_dict
                 wifi_dict[i[0]] = 1
             else
                 wifi_dict[i[0]] += 1
 
-            # ´æ´¢Á¬½ÓµÄwifiĞÅºÅ
+            # å­˜å‚¨è¿æ¥çš„wifiä¿¡å·
             if i[2] == 'true'
                 wifi_con_remain.append(i[0])
                 status = 1
@@ -131,7 +126,7 @@ for ID, mall in enumerate(mall_list)
         if status == 0
             wifi_con_remain.append('NONE')
 
-        # ±£ÁôwifiĞÅÏ¢
+        # ä¿ç•™wifiä¿¡æ¯
         if len(wifi_list)  3
             wifi_remain.append('NONE')
         else
@@ -139,19 +134,19 @@ for ID, mall in enumerate(mall_list)
             save_wifi = sort_list[remain_num]
             wifi_remain.append(row[[wifi_name[0] for wifi_name in save_wifi]])
 
-        # ¼ÇÂ¼ĞÂµÄÓÃ»§Êı¾İ
+        # è®°å½•æ–°çš„ç”¨æˆ·æ•°æ®
         l.append(row)
 
-    '''Ä¿µÄ£º·Ö±æµÍÓÚãĞÖµµÄwifiĞÅºÅ£¨ÈÏÎªÃ»ÓĞ×÷ÓÃ£©'''
-    # Õâ¸öÑ­»·»ñÈ¡µ½ÁËµÍÓÚãĞÖµµÄwifiÃû³Æ
+    '''ç›®çš„ï¼šåˆ†è¾¨ä½äºé˜ˆå€¼çš„wifiä¿¡å·ï¼ˆè®¤ä¸ºæ²¡æœ‰ä½œç”¨ï¼‰'''
+    # è¿™ä¸ªå¾ªç¯è·å–åˆ°äº†ä½äºé˜ˆå€¼çš„wifiåç§°
     delate_wifi = []
     for i in wifi_dict
         if wifi_dict[i]  threshold
             delate_wifi.append(i)
 
-    # Õâ¸öÑ­»·»ñÈ¡µ½ÁË¸ßÓÚãĞÖµµÄwifiÃû³Æ
-    # ²¢ÒÔ´ËÅĞ¶ÏÉ¸Ñ¡¸÷¸öÓÃ»§ÖĞµÄĞÅÏ¢
-    # ×¢ÒâkeyÖĞÈÔº¬ÓĞÎ»ÖÃµÈµÈĞÅÏ¢£¬Ö»ÊÇÅÅ³ıÁË²»ĞèÒªµÄwifiĞÅºÅ
+    # è¿™ä¸ªå¾ªç¯è·å–åˆ°äº†é«˜äºé˜ˆå€¼çš„wifiåç§°
+    # å¹¶ä»¥æ­¤åˆ¤æ–­ç­›é€‰å„ä¸ªç”¨æˆ·ä¸­çš„ä¿¡æ¯
+    # æ³¨æ„keyä¸­ä»å«æœ‰ä½ç½®ç­‰ç­‰ä¿¡æ¯ï¼Œåªæ˜¯æ’é™¤äº†ä¸éœ€è¦çš„wifiä¿¡å·
     m = []
     for index, row in enumerate(l)
         new = {}
@@ -159,7 +154,7 @@ for ID, mall in enumerate(mall_list)
             if n not in delate_wifi
                 new[n] = row[n]
 
-        # Ìí¼ÓÓû±£ÁôµÄwifiĞÅÏ¢
+        # æ·»åŠ æ¬²ä¿ç•™çš„wifiä¿¡æ¯
         if type(wifi_remain[index] == 'NONE') == bool
             pass
         else
@@ -167,7 +162,7 @@ for ID, mall in enumerate(mall_list)
             for n in remain_dict.keys()
                 new[n] = remain_dict[n]
 
-                # Èç¹ûÁ¬½ÓµÄwifi¸ßÓÚãĞÖµ£¬¿ÉÄÜÆäÎª¹«¹²wifiÃ»ÓĞ´ú±íÒâÒå,µ«ÔÚÕâÀïÈ«²¿±£Áô
+                # å¦‚æœè¿æ¥çš„wifié«˜äºé˜ˆå€¼ï¼Œå¯èƒ½å…¶ä¸ºå…¬å…±wifiæ²¡æœ‰ä»£è¡¨æ„ä¹‰,ä½†åœ¨è¿™é‡Œå…¨éƒ¨ä¿ç•™
             try
                 if type(wifi_con_remain[index] == 'NONE') == bool
                     pass
@@ -177,82 +172,12 @@ for ID, mall in enumerate(mall_list)
                 pass
 
         m.append(new)
-    # »ñÈ¡µ½ÁËÕâ¸öÉÌµê¶ÔÓ¦ÓÃ»§×îÖÕµÄÊı¾İ¼¯
+    # è·å–åˆ°äº†è¿™ä¸ªå•†åº—å¯¹åº”ç”¨æˆ·æœ€ç»ˆçš„æ•°æ®é›†
     train1 = pd.DataFrame(m)
 
-    # »ñÈ¡ÑµÁ·¼¯
+    # è·å–è®­ç»ƒé›†
     df_train = train1[train1.shop_id.notnull()]
-    # ±£Áô´¦ÀíºÃµÄÑµÁ·¼¯
+    # ä¿ç•™å¤„ç†å¥½çš„è®­ç»ƒé›†
     train1.to_csv(r'Gcustomer&fixed-positiondatatest_mall__' + mall + '.csv')
-    print('{} {}ÉÌ³¡Êı¾İ±£´æÍê±Ï'.format(datetime.now(), mall))
-    # »ñÈ¡²âÊÔ¼¯
-    df_test = train1[train1.shop_id.isnull()]
-    # »ñÈ¡±êÇ©
-    '''  ÔÚÕâÀïÎÒÃÇ½«ÉÌµê±êÇ©ÏŞÖÆµ½ÁË¶ÔÓ¦µÄÉÌ³¡ÖĞ   '''
-    lbl = preprocessing.LabelEncoder()
-    lbl.fit(list(df_train['shop_id'].values))
-    # Ìí¼Ó±êÇ©
-    df_train['label'] = lbl.transform(list(df_train['shop_id'].values))
-    # ¶¨ÒåÖÖÀà
-    num_class = df_train['label'].max() + 1
-
-    # ¶¨Òå³¬²ÎÊı
-    # ·ÖÀàÆ÷µÄÊ¹ÓÃÎÒ²»Çå³ş
-    params = {
-        'objective' 'multisoftmax',
-        'min_child_weight' 2,
-        'gamma' 0.25,
-        'subsample' 0.82,
-        'colsample_bytree' 0.7,
-        'eta' 0.08,
-        'max_depth' 4,
-        'eval_metric' 'merror',
-        'seed' 0,
-        'missing' -999,
-        'num_class' num_class,
-        'scale_pos_weight' 0.8,
-        'silent' 1,
-
-    }
-
-    # »ñÈ¡ÌØÕ÷wifiºÍÎ»ÖÃ
-    feature = [x for x in train1.columns if
-               x not in ['user_id', 'label', 'shop_id', 'time_stamp', 'mall_id', 'wifi_infos', 'DATE', 'Unnamed 0']]
-
-    # ÎªÁËÖ®ºóµÄÖØ¸´ÑµÁ·£¬ÔÚÕâÀïÏÈ±£´æÊı¾İ
-    xgbtrain = xgb.DMatrix(df_train[feature], df_train['label'])
-    xgbtest = xgb.DMatrix(df_test[feature])
-
-    # ¶ÔÓÚÑµÁ·¼¯£¬ÎÒÔÚ×ø±êÉÏÌí¼ÓÒ»¶¨ÔëÒô
-    # df_train = noise_Add(df_train)
-
-
-    '''·ÖÀàÆ÷µÄÊ¹ÓÃ'''
-
-    # ÑµÁ·²¿·Ö
-
-    ''' Q2 ¹ØÓÚÑµÁ·¼¯Êı¾İµÄ×¼È·ĞÎÊ½
-    A2£ºÑµÁ·¼¯µÄColumnsÊÇÒÔÌØÕ÷wifiÓë¾«¶ÈÎ¬¶È×é³ÉµÄÊı¾İ£¬
-    ÖµµÃ×¢ÒâµÄÊÇ£¬ÌØÕ÷wifi²¢²»ÊÇÃ¿Ò»¸öÓÃ»§¶¼º¬ÓĞ£¬ÕâÀïpdºÜÓÅĞãµÄ±ãÊÇ×Ô¶¯ÒÔNaN´úÌæ
-    ÕâÔÚ·ÖÀàÆ÷ÖĞÊÇ¿ÉÒÔ¼æÈİµÄ'''
-
-    watchlist = [(xgbtrain, 'train'), (xgbtrain, 'test')]
-    num_rounds = 140
-    if LOAD
-        model = xgb.Booster({'nthread' 4})
-        model.load_model(save_path + '6')
-        model.train(params, xgbtrain, num_rounds, watchlist, early_stopping_rounds=15)
-    else
-        model = xgb.train(params, xgbtrain, num_rounds, watchlist, early_stopping_rounds=6)
-    # ±£´æÄ£ĞÍ
-    model.save_model(save_path + mall + '.model')
-
-    # ²âÊÔ²¿·Ö
-    df_test['label'] = model.predict(xgbtest)
-    df_test['shop_id'] = df_test['label'].apply(lambda x lbl.inverse_transform(int(x)))
-    # ¼ÇÂ¼½á¹û
-    r = df_test[['row_id', 'shop_id']]
-    result = pd.concat([result, r])
-    result['row_id'] = result['row_id'].astype('int')
-    result.to_csv(path + 'sub.csv', index=False)
-
+    print('{} {}å•†åœºæ•°æ®ä¿å­˜å®Œæ¯•'.format(datetime.now(), mall))
+   
