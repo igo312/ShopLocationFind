@@ -23,9 +23,9 @@
   第二我保留强度前2的wifi，并且对于连接上的wifi的强度进行了重新赋值。
 
   第三我考虑了公共wifi，即高于多少频次认为是公共wifi（但是在计算时我并没有删除）
-  
 
-  ## [2.对于经纬度的处理](https://github.com/igo312/ShopLocationFind/tree/master/location_process)
+
+  ### [2.对于经纬度的处理](https://github.com/igo312/ShopLocationFind/tree/master/location_process)
 
   我求取了店铺经纬度与用户经纬度之间的真实距离，发现含有距离过远的用户，即异常值
 
@@ -45,7 +45,9 @@
   同时，时间的抽取是按分钟的，出现了同一时间同一店铺同一用户不同位置的情况。认为是不利于训练故放弃
 
 
-## [二.模型训练](https://github.com/igo312/ShopLocationFind/tree/master/model)
+## 二.模型训练
+  
+  [模型训练](https://github.com/igo312/ShopLocationFind/tree/master/model)
 
   在获取保留wifi或者经纬度距离保留值参数我使用了lightgbm
 
@@ -57,7 +59,7 @@
 
   同时我将用于验证集的early_stop用于了训练，因为了多个样本，我并不知道这是否合适
 
-其中一个问题是训练是针对于商场展开的，一个商场一个模型
+  其中一个问题是训练是针对于商场展开的，一个商场一个模型
 
-这样对于机器的硬件要求降低，但不一定是一个好模型
+  这样对于机器的硬件要求降低，但不一定是一个好模型
 
