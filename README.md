@@ -12,7 +12,7 @@
 
 ## 一.数据分析
 
-我上传的ipny文件其实十分简单，并且这是我最早期用来可视化的用途
+我上传的[ipny文件](https://github.com/igo312/ShopLocationFind/blob/master/customer_data_analyse.ipynb)其实十分简单，并且这是我最早期用来可视化的用途
 
 对于数据分析我主要做了三点
 
